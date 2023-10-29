@@ -5,6 +5,22 @@ the repository containes the code to push notification to flutter using firebase
 ## ⚠ Update :- 
 I missed the part of handling the terminated state message payload in the video. I have fixed that issue and updated the code on github repository.
 
+Just added this lines in main.dart file
+
+```
+ // for handling in terminated state
+  final RemoteMessage? message =
+      await FirebaseMessaging.instance.getInitialMessage();
+
+  if (message != null) {
+    print("Launched from terminated state");
+    Future.delayed(Duration(seconds: 1), () {
+      navigatorKey.currentState!.pushNamed("/message", arguments: message);
+    });
+  }
+```
+
+
 ## 👨‍💻 Topics :-
 - Push notification in background
 - Push notification in foreground
