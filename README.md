@@ -2,6 +2,9 @@
 
 the repository containes the code to push notification to flutter using firebase messaging both in background and foreground.
 
+## ⚠ Update :- 
+I missed the part of handling the terminated state message payload in the video. I have fixed that issue and updated the code on github repository.
+
 ## 👨‍💻 Topics :-
 - Push notification in background
 - Push notification in foreground
