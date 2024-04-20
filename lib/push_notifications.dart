@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:push_notifications_firebase_flutter/main.dart';
 
@@ -17,9 +18,36 @@ class PushNotifications {
       provisional: false,
       sound: true,
     );
-    // get the device fcm token
-    final token = await _firebaseMessaging.getToken();
-    print("device token: $token");
+
+    getFCMToken();
+  }
+
+// get the fcm device token
+  static Future getFCMToken({int maxRetires = 3}) async {
+    try {
+      String? token;
+      if (kIsWeb) {
+        // get the device fcm token
+        token = await _firebaseMessaging.getToken(
+            vapidKey:
+                "BJzRufH-VxRc7wLunA6WOaf-gVurFKhDluPRFB8644PQHw6OfWH8uzybtYsFBTA326_yy3PEG-L7OK_ojVsMmrI");
+        print("for web device token: $token");
+      } else {
+        // get the device fcm token
+        token = await _firebaseMessaging.getToken();
+        print("for android device token: $token");
+      }
+      return token;
+    } catch (e) {
+      print("failed to get device token");
+      if (maxRetires > 0) {
+        print("try after 10 sec");
+        await Future.delayed(Duration(seconds: 10));
+        return getFCMToken(maxRetires: maxRetires - 1);
+      } else {
+        return null;
+      }
+    }
   }
 
 // initalize local notifications

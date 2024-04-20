@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:push_notifications_firebase_flutter/message.dart';
 import 'package:push_notifications_firebase_flutter/push_notifications.dart';
@@ -16,6 +17,24 @@ Future _firebaseBackgroundMessage(RemoteMessage message) async {
   if (message.notification != null) {
     print("Some notification Received");
   }
+}
+
+// to handle notification on foreground on web platform
+void showNotification({required String title, required String body}) {
+  showDialog(
+    context: navigatorKey.currentContext!,
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: Text(body),
+      actions: [
+        TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text("Ok"))
+      ],
+    ),
+  );
 }
 
 void main() async {
@@ -33,7 +52,10 @@ void main() async {
   });
 
   PushNotifications.init();
-  PushNotifications.localNotiInit();
+  // only initialize if platform is not web
+  if (!kIsWeb) {
+    PushNotifications.localNotiInit();
+  }
   // Listen to background notifications
   FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessage);
 
@@ -42,10 +64,16 @@ void main() async {
     String payloadData = jsonEncode(message.data);
     print("Got a message in foreground");
     if (message.notification != null) {
-      PushNotifications.showSimpleNotification(
-          title: message.notification!.title!,
-          body: message.notification!.body!,
-          payload: payloadData);
+      if (kIsWeb) {
+        showNotification(
+            title: message.notification!.title!,
+            body: message.notification!.body!);
+      } else {
+        PushNotifications.showSimpleNotification(
+            title: message.notification!.title!,
+            body: message.notification!.body!,
+            payload: payloadData);
+      }
     }
   });
 
